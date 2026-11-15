@@ -1,1 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>组会资料 · 共享站</title>
+  <!-- 使用简洁的字体与设计，方便扩展，完全静态，适配GitHub Pages -->
+  <style>
+    /* 全局重置与变量 —— 易扩展的主题色 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    :root {
+      --primary: #2a6f97;
+      --primary-light: #4a8bb3;
+      --primary-soft: #e7f0f7;
+      --text-dark: #1e2b3a;
+      --text-soft: #3b4e5e;
+      --bg-body: #f7f9fc;
+      --card-bg: #ffffff;
+      --border-light: #d9e2ec;
+      --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.02), 0 1px 4px rgba(0, 0, 0, 0.03);
+      --shadow-hover: 0 12px 24px -8px rgba(0, 60, 100, 0.15), 0 4px 10px -4px rgba(0, 0, 0, 0.05);
+      --radius-card: 16px;
+      --radius-btn: 30px;
+      --transition: all 0.2s ease;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-dark);
+      line-height: 1.5;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 主容器：宽度自适应，留出右侧空白，方便后续添加更多区块 */
+    .app-wrapper {
+      max-width: 1280px;
+      width: 100%;
+    }
+
+    /* 头部区域 —— 轻量可修改 */
+    .site-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .title-section h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-section h1 span {
+      background: var(--primary-soft);
+      font-size: 0.9rem;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-weight: 400;
+      color: var(--primary);
+      letter-spacing: normal;
+    }
+
+    .title-section .subhead {
+      color: var(--text-soft);
+      font-size: 1rem;
+      margin-top: 0.4rem;
+      font-weight: 400;
+    }
+
+    /* 右侧可编辑的说明/上传提示 —— 留白区域，容易改成按钮或链接 */
+    .header-actions {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .upload-hint {
+      background: var(--card-bg);
+      padding: 0.6rem 1.5rem;
+      border-radius: var(--radius-btn);
+      box-shadow: var(--shadow-sm);
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: default;
+    }
+
+    .upload-hint i {
+      font-style: normal;
+      font-size: 1.2rem;
+    }
+
+    /* 这里预留一个可编辑的“上传”链接样式，可以替换为真实的上传入口 (如netlify函数或表单) */
+    .upload-link {
+      background: var(--primary);
+      color: white;
+      padding: 0.6rem 1.6rem;
+      border-radius: var(--radius-btn);
+      font-weight: 500;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      border: 1px solid var(--primary);
+      box-shadow: 0 4px 8px rgba(42, 111, 151, 0.2);
+      cursor: pointer;
+    }
+
+    .upload-link:hover {
+      background: #1f5a7a;
+      border-color: #1f5a7a;
+      box-shadow: 0 8px 16px rgba(42, 111, 151, 0.3);
+    }
+
+    /* 文件卡片网格 —— 灵活响应，容易增删 */
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.8rem;
+      margin: 2rem 0 3rem;
+    }
+
+    /* 卡片设计：清晰，可编辑内部内容，预留备注区域 */
+    .resource-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      padding: 1.5rem 1.5rem 1.2rem;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .resource-card:hover {
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    /* 文件类型徽章 */
+    .file-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.2rem 1rem;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      width: fit-content;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(42, 111, 151, 0.15);
+    }
+
+    .file-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+      color: var(--text-dark);
+      word-break: break-word;
+    }
+
+    /* 备注区域 —— 采用轻盈的灰色底色，文本可长可短 */
+    .file-notes {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      background: #f2f6fa;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      margin: 0.75rem 0 1.25rem;
+      line-height: 1.5;
+      border-left: 3px solid var(--primary-light);
+      font-style: normal;
+      word-break: break-word;
+    }
+
+    .file-notes strong {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* 文件元信息 (日期/大小等) */
+    .file-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #6b7f8f;
+      margin-bottom: 1.3rem;
+      border-top: 1px dashed var(--border-light);
+      padding-top: 0.9rem;
+      margin-top: auto;
+    }
+
+    /* 操作按钮组：下载/浏览 */
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: transparent;
+      flex: 1 0 auto;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: #1f5a7a;
+      border-color: #1f5a7a;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border-light);
+      color: var(--text-soft);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    /* 空状态/新增卡片占位 —— 方便添加更多文件 */
+    .add-placeholder {
+      border: 2px dashed var(--border-light);
+      background: transparent;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      color: #8a9aa8;
+      font-weight: 500;
+      border-radius: var(--radius-card);
+      transition: var(--transition);
+      cursor: default;
+    }
+
+    .add-placeholder:hover {
+      border-color: var(--primary-light);
+      color: var(--primary);
+      background: rgba(42, 111, 151, 0.02);
+    }
+
+    .add-placeholder .plus-icon {
+      font-size: 2.2rem;
+      font-weight: 300;
+      margin-right: 0.5rem;
+      line-height: 1;
+    }
+
+    /* 页脚说明区 —— 可自定义 */
+    .site-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      color: #6b7f8f;
+      font-size: 0.85rem;
+    }
+
+    .site-footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* 工具类 */
+    .text-small {
+      font-size: 0.8rem;
+    }
+
+    /* 移动端优化 */
+    @media (max-width: 600px) {
+      body {
+        padding: 1.5rem 1rem;
+      }
+
+      .site-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .title-section h1 {
+        font-size: 1.9rem;
+      }
+
+      .resource-grid {
+        gap: 1.2rem;
+      }
+
+      .resource-card {
+        padding: 1.2rem;
+      }
+
+      .btn {
+        flex: 1 1 100%;
+      }
+    }
+
+    /* 可打印/可编辑的注释：每个卡片都可以添加或删除，保持 HTML 结构清晰即可 */
+  </style>
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- 头部：可自由编辑标题、说明和上传入口 -->
+    <header class="site-header">
+      <div class="title-section">
+        <h1>
+          📚 组会资料库
+          <span>v1.0</span>
+        </h1>
+        <div class="subhead">PDF · PPT · 备注 · 一键下载/预览</div>
+      </div>
+      <div class="header-actions">
+        <!-- 这个区域特意留有编辑余地，可以改成 GitHub 仓库链接、上传表单，或者直接上传说明 -->
+        <div class="upload-hint">
+          <i>📤</i> 上传新资料，请替换此链接
+        </div>
+        <!-- 这里可以用GitHub仓库地址或Issue链接替代，用来提示如何上传 -->
+        <a href="#" class="upload-link" title="示例链接，可以改成仓库地址或上传页">
+          <i>➕</i> 上传文件
+        </a>
+      </div>
+    </header>
+
+    <!-- 文件卡片网格 —— 每个卡片代表一个组会资料。方便复制、添加、删除 -->
+    <div class="resource-grid">
+
+      <!-- 卡片 1：示例 PDF + 备注，里面的链接都可以替换为你的真实文件地址 -->
+      <div class="resource-card">
+        <div class="file-badge">PDF</div>
+        <div class="file-title">Transformer 架构解析</div>
+        <!-- 备注区域：可以自由编辑文字，长文本自动换行 -->
+        <div class="file-notes">
+          <strong>📝 备注：</strong> 讨论了注意力机制优化、多头注意力的内存瓶颈，并推荐阅读 FlashAttention 论文。
+        </div>
+        <div class="file-meta">
+          <span>📅 2025-03-12</span>
+          <span>2.4 MB</span>
+        </div>
+        <div class="card-actions">
+          <!-- 请将 href 替换为你的实际文件链接 (如 github pages 上的 pdf 路径) -->
+          <a href="#" class="btn btn-primary" target="_blank" rel="noopener">📄 浏览 PDF</a>
+          <a href="#" class="btn btn-outline" download>⬇️ 下载</a>
+        </div>
+      </div>
+
+      <!-- 卡片 2：示例 PPT + 备注 -->
+      <div class="resource-card">
+        <div class="file-badge">PPT</div>
+        <div class="file-title">多模态大模型进展</div>
+        <div class="file-notes">
+          <strong>📝 备注：</strong> 组会分享 LLaVA、Flamingo 等模型，重点分析了视觉-语言对齐方法。下次组会讨论评估指标。
+        </div>
+        <div class="file-meta">
+          <span>📅 2025-03-05</span>
+          <span>8.1 MB</span>
+        </div>
+        <div class="card-actions">
+          <a href="#" class="btn btn-primary" target="_blank" rel="noopener">📊 浏览 PPT</a>
+          <a href="#" class="btn btn-outline" download>⬇️ 下载</a>
+        </div>
+      </div>
+
+      <!-- 卡片 3：示例 PDF 带详细备注，可以灵活修改标题、徽章、备注 -->
+      <div class="resource-card">
+        <div class="file-badge">PDF</div>
+        <div class="file-title">扩散模型在推荐系统中的应用</div>
+        <div class="file-notes">
+          <strong>📝 备注：</strong> 涉及 DiffRec、DreamRec 两篇论文；讨论了负采样策略和推理速度优化。代码复现计划下周同步。
+        </div>
+        <div class="file-meta">
+          <span>📅 2025-02-26</span>
+          <span>3.7 MB</span>
+        </div>
+        <div class="card-actions">
+          <a href="#" class="btn btn-primary" target="_blank" rel="noopener">📄 浏览 PDF</a>
+          <a href="#" class="btn btn-outline" download>⬇️ 下载</a>
+        </div>
+      </div>
+
+      <!-- 卡片 4：示例 PPT，可展示不同文件类型，徽章可改成任意文字 -->
+      <div class="resource-card">
+        <div class="file-badge">PPT</div>
+        <div class="file-title">强化学习在芯片设计中的应用</div>
+        <div class="file-notes">
+          <strong>📝 备注：</strong> 介绍了 Google 的 Chip Placement 工作，以及开源的 Circuit Training 框架。需要进一步调研实际工业部署。
+        </div>
+        <div class="file-meta">
+          <span>📅 2025-02-19</span>
+          <span>5.2 MB</span>
+        </div>
+        <div class="card-actions">
+          <a href="#" class="btn btn-primary" target="_blank" rel="noopener">📊 浏览 PPT</a>
+          <a href="#" class="btn btn-outline" download>⬇️ 下载</a>
+        </div>
+      </div>
+
+      <!-- 占位卡片：提醒此处可以添加新卡片。复制上方任意卡片即可扩展。 -->
+      <div class="add-placeholder">
+        <span class="plus-icon">+</span> 添加更多资料 (复制卡片结构)
+      </div>
+
+    </div>
+
+    <!-- 页脚：说明如何修改与上传，友好提示 -->
+    <footer class="site-footer">
+      <div>
+        💡 所有文件链接和备注均可直接编辑。将PDF/PPT放入仓库，修改 <code>href</code> 即可。
+      </div>
+      <div>
+        <a href="#" target="_blank">GitHub 仓库</a> · 组会共享 · 自由下载
+      </div>
+    </footer>
+  </div>
+
+  <!-- 一个小提示：页面内所有 a 标签的 href 默认为 # ，请替换成真实文件地址 -->
+  <!-- 如果你希望通过 GitHub Pages 托管文件，可以把 PDF/PPT 放在同一仓库，链接使用相对路径或绝对URL -->
+</body>
+</html>
